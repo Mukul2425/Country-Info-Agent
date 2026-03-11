@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from app.agent.graph import graph
 
-
+from dotenv import load_dotenv
+load_dotenv()
 app = FastAPI()
 
 

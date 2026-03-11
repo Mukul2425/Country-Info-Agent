@@ -2,31 +2,19 @@ import json
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from app.agent.state import AgentState
+from langchain_google_genai import ChatGoogleGenerativeAI
+from dotenv import load_dotenv
+import os
+load_dotenv()
+from app.schemas.intent_schema import IntentSchema
 
-llm = ChatOpenAI(model="gpt-4o-mini")
 
-
-intent_prompt = ChatPromptTemplate.from_template(
-"""
-Extract the country and requested information fields from the question.
-
-Supported fields:
-capital
-population
-currency
-region
-languages
-
-Return JSON ONLY:
-
-{
-  "country": "...",
-  "fields": ["..."]
-}
-
-Question: {question}
-"""
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0
 )
+intent_llm = llm.with_structured_output(IntentSchema)
+
 
 
 def extract_intent(state: AgentState):
@@ -34,16 +22,29 @@ def extract_intent(state: AgentState):
     question = state["question"]
 
     try:
-        response = llm.invoke(intent_prompt.format(question=question))
+        result = intent_llm.invoke(
+            f"""
+Extract the country and requested fields from the question.
 
-        data = json.loads(response.content)
+Allowed fields:
+capital
+population
+currency
+region
+languages
+
+Question: {question}
+"""
+        )
 
         return {
-            "country": data.get("country"),
-            "fields": data.get("fields", [])
-        }
+        "country": result.country,
+        "fields": result.fields or []
+    }
 
-    except Exception:
+    except Exception as e:
+
+        print("Intent extraction error:", e)
 
         return {
             "error": "Failed to extract intent."
