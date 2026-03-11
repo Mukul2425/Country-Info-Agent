@@ -1,5 +1,4 @@
 import json
-from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from app.agent.state import AgentState
 from langchain_google_genai import ChatGoogleGenerativeAI
