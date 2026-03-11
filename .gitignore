@@ -1,0 +1,15 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment Variables (Crucial for security!)
+.env
+
+# macOS files
+.DS_Store
