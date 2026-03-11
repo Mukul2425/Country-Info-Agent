@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 from app.schemas.intent_schema import IntentSchema
-
+from app.utils.logger import logger
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
@@ -20,7 +20,7 @@ intent_llm = llm.with_structured_output(IntentSchema)
 def extract_intent(state: AgentState):
 
     question = state["question"]
-
+    logger.info(f"Extracting intent from question: {question}")
     try:
         result = intent_llm.invoke(
             f"""
@@ -43,6 +43,7 @@ Question: {question}
     }
 
     except Exception as e:
+        logger.error(f"Error occurred while extracting intent: {e}")
 
         print("Intent extraction error:", e)
 
@@ -56,7 +57,7 @@ from app.tools.country_api import get_country_data
 def call_country_api(state: AgentState):
 
     country = state.get("country")
-
+    logger.info(f"Calling REST Countries API for: {country}")
     if not country:
         return {"error": "No country provided."}
 
@@ -68,7 +69,8 @@ def call_country_api(state: AgentState):
     return {"api_data": data}
 
 def synthesize_answer(state: AgentState):
-
+    
+    logger.info("Synthesizing final answer")
     if state.get("error"):
         return {"answer": state["error"]}
 
